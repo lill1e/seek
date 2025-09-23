@@ -1,21 +1,21 @@
 import puppeteer, { Page } from "puppeteer"
 import { WebhookClient } from "discord.js"
+import dotenv from "dotenv"
 
 type MailingList = [string, string]
 type AlphabeticalList = MailingList[]
 interface MailingAList {
     [key: string]: string
 }
-const sympaServer = ""
-const webhookUrl = ""
-const userAgent = ""
 
-const webhook = new WebhookClient({ url: webhookUrl })
+dotenv.config()
+
+const webhook = new WebhookClient({ url: process.env.DISCORD_WEBHOOK ?? "discord.com" })
 let lists: MailingAList = {}
 
 function getMailingLists(page: Page): Promise<MailingList[]> {
     return new Promise((resolve, reject) => {
-        page.goto(`https://${sympaServer}/sympa/lists`, { waitUntil: "networkidle0" })
+        page.goto(`https://${process.env.SYMPA_SERVER ?? "example.org"}/sympa/lists`, { waitUntil: "networkidle0" })
             .then(_ => page)
             .then(page => page.evaluate(() =>
                 Array.from(document.querySelectorAll("article"))
@@ -31,13 +31,13 @@ function getMailingLists(page: Page): Promise<MailingList[]> {
     })
 }
 
-puppeteer.launch({ headless: true })
+puppeteer.launch({ headless: false })
     .then(browser => browser.newPage())
     .then(async page => {
         return page.setViewport({
             width: 1920,
             height: 1080
-        }).then(_ => page.setUserAgent({ userAgent: userAgent }).then(_ => page))
+        }).then(_ => page.setUserAgent({ userAgent: process.env.USER_AGENT ?? "seek/1.0" }).then(_ => page))
     })
     .then(page => {
         let func = () => getMailingLists(page).then(mailingLists => {
