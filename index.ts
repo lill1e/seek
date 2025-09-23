@@ -31,7 +31,7 @@ function getMailingLists(page: Page): Promise<MailingList[]> {
     })
 }
 
-puppeteer.launch({ headless: false })
+puppeteer.launch({ headless: true })
     .then(browser => browser.newPage())
     .then(async page => {
         return page.setViewport({
